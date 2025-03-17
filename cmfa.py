@@ -67,7 +67,7 @@ class Cluster:
 				y = Si.v[1] + (j+1)*(self.Center.v[1]-Si.v[1])/(add+1)
 				z = Si.v[2] + (j+1)*(self.Center.v[2]-Si.v[2])/(add+1)
 
-				sensor = (x, y)
+				sensor = (x, y, z)
 				Rn.append(sensor)
 
 		ans = []
@@ -84,184 +84,7 @@ class Cluster:
 
 
 		for Si, Sj in ans:
-
 			Rn.append(Put_Relay(Si, Sj))
-			# A = Si
-			# B = Sj
-			# all_sec = False
-			# all_commu = False
-			# MA = []
-			# MB = []
-			# for T1 in Si.Targets:
-			# 	for T2 in Sj.Targets:
-			# 		P1 = T1.v
-			# 		P2 = T2.v
-
-			# 		RP1 = T1.Rsz
-			# 		RP2 = T2.Rsz
-
-
-			# 		M1 = circle_line_intersection(P1, RP1, A.v, B.v)
-
-
-			# 		M2 = circle_line_intersection(P2, RP2, A.v, B.v)
-
-
-			# 		for M in M1:
-			# 			MA.append(M)
-
-			# 		for M in M2:
-			# 			MB.append(M)
-
-
-			# if A.v[0] < B.v[0]:
-			# 	MA.sort(reverse = True)
-			# 	MB.sort()
-
-			# 	if len(MA) > 0 and len(MB) > 0:
-			# 		if MA[0] >= MB[0]:
-			# 			all_sec = True
-
-			# elif A.v[0] > B.v[0]:
-			# 	MA.sort()
-			# 	MB.sort(reverse = True)
-			# 	if len(MA) > 0 and len(MB) > 0:
-			# 		if MA[0] <= MB[0]:
-			# 			all_sec = True
-
-			# else:
-			# 	if A.v[1] < B.v[1]:
-			# 		MA.sort(reverse = True, key = lambda x: x[1])
-			# 		MB.sort(key = lambda x: x[1])
-
-			# 		if len(MA) > 0 and len(MB) > 0:
-			# 			if MA[1] >= MB[1]:
-			# 				all_sec = True
-
-			# 	elif A.v[1] > B.v[1]:
-			# 		MA.sort(key = lambda x: x[1])
-			# 		MB.sort(reverse = True, key = lambda x: x[1])
-
-			# 		if len(MA) > 0 and len(MB) > 0:
-			# 			if MA[1] <= MB[1]:
-			# 				all_sec = True
-
-			# if len(MA) > 0:
-			# 	MA = MA[0]
-			# else:
-			# 	MA = False
-
-			# if len(MB) > 0:
-			# 	MB = MB[0]
-			# else:
-			# 	MB = False
-
-			# if not MA and not MB:
-			# 	Ta = A.Targets
-			# 	Tb = B.Targets
-
-			# 	for T in Ta:
-			# 		if dist(T.v, B.v) <= T.Rsz:
-			# 			all_sec = True
-			# 			break
-
-			# 	for T in Tb:
-			# 		if dist(A.v, T.v) <= T.Rsz:
-			# 			all_sec = True
-			# 			break
-
-			# 	if not all_sec:
-			# 		all_commu = True
-
-			# if all_sec:
-			# 	c = dist(A.v, B.v)
-			# 	add = int((c-0.0001)//(Rsc))
-			# 	for j in range(add):
-			# 		x = A.v[0] + (j+1)*(B.v[0]-A.v[0])/(add+1)
-			# 		y = A.v[1] + (j+1)*(B.v[1]-A.v[1])/(add+1)
-
-			# 		sensor = (x, y)
-			# 		Rn.append(sensor)
-
-			# elif all_commu:
-			# 	c = dist(A.v, B.v)
-			# 	add = int((c-0.0001)//(Rc))
-			# 	for j in range(add):
-			# 		x = A.v[0] + (j+1)*(B.v[0]-A.v[0])/(add+1)
-			# 		y = A.v[1] + (j+1)*(B.v[1]-A.v[1])/(add+1)
-
-			# 		sensor = (x, y)
-
-			# 		Rn.append(sensor)
-
-			# else:
-			# 	put_A = False
-			# 	put_B = False
-			# 	if MA and MB:
-			# 		Rn.append(MA)
-			# 		Rn.append(MB)
-			# 		put_A = True
-			# 		put_B = True
-			# 		c = dist(MA, MB)
-			# 		add = int((c-0.0001)//(Rc))
-
-			# 		for j in range(add):
-			# 			x = MA[0] + (j+1)*(MB[0]-MA[0])/(add+1)
-			# 			y = MA[1] + (j+1)*(MB[1]-MA[1])/(add+1)
-
-			# 			sensor = (x, y)
-
-			# 			Rn.append(sensor)
-
-			# 	elif MA and not MB:
-			# 		Rn.append(MA)
-			# 		put_A = True
-
-			# 		c = dist(MA, B.v)
-			# 		add = int((c-0.0001)//(Rc))
-
-			# 		for j in range(add):
-			# 			x = MA[0] + (j+1)*(B.v[0]-MA[0])/(add+1)
-			# 			y = MA[1] + (j+1)*(B.v[1]-MA[1])/(add+1)
-
-			# 			sensor = (x, y)
-			# 			Rn.append(sensor)
-
-			# 	elif MB and not MA:
-			# 		Rn.append(MB)
-			# 		put_B = True
-
-			# 		c = dist(A.v, MB)
-			# 		add = int((c-0.0001)//(Rc))
-
-			# 		for j in range(add):
-			# 			x = A.v[0] + (j+1)*(MB[0]-A.v[0])/(add+1)
-			# 			y = A.v[1] + (j+1)*(MB[1]-A.v[1])/(add+1)
-
-			# 			sensor = (x, y)
-			# 			Rn.append(sensor)
-
-			# 	if put_A:
-			# 		c = dist(A.v, MA)
-			# 		add = int((c-0.0001)//(Rsc))
-			# 		for j in range(add):
-			# 			x = A.v[0] + (j+1)*(MA[0]-A.v[0])/(add+1)
-			# 			y = A.v[1] + (j+1)*(MA[1]-A.v[1])/(add+1)
-
-			# 			sensor = (x, y)
-			# 			Rn.append(sensor)
-
-			# 	if put_B:
-			# 		c = dist(B.v, MB)
-			# 		add = int((c-0.0001)//(Rsc))
-			# 		for j in range(add):
-			# 			x = B.v[0] + (j+1)*(MB[0]-B.v[0])/(add+1)
-			# 			y = B.v[1] + (j+1)*(MB[1]-B.v[1])/(add+1)
-
-			# 			sensor = (x, y)
-			# 			Rn.append(sensor)
-
-			# plt.plot([Si.v[0], Sj.v[0]], [Si.v[1], Sj.v[1]], c = 'green')
 
 		return ans
 
@@ -525,7 +348,7 @@ def Put_relay_E(A, B, Rn):
 				sensor = (x, y, z)
 				Rn.append(sensor)
 
-def Put_relay_E(A: Target, B: Target | Base):
+def Put_relay_E(A: Target, B: Target):
 	res = []
 	if type(B) == Base:
 		S = A.Sensors[0]
@@ -583,18 +406,17 @@ def Put_Relay(S1: Sensor, S2:Sensor):
 			RP1 = T1.Rsz
 			RP2 = T2.Rsz
 
-			# M1 = circle_line_intersection(P1, RP1, S1.v, S2.v)
-			# M2 = circle_line_intersection(P2, RP2, S1.v, S2.v)
-
-			M1.extend(line_sphere_intersection(P1, RP1, S1.v, S2.v))
-			M2.extend(line_sphere_intersection(P2, RP2, S1.v, S2.v))
+			if Dim == "3D":
+				M1.extend(line_sphere_intersection(P1, RP1, S1.v, S2.v))
+				M2.extend(line_sphere_intersection(P2, RP2, S1.v, S2.v))
+			elif Dim == "2D":
+				M1.extend(circle_line_intersection(P1, RP1, S1.v, S2.v))
+				M2.extend(circle_line_intersection(P2, RP2, S1.v, S2.v))
 
 	if M1:
 		if M2:
 			farA = max(M1, key= lambda x: x[-1])
 			nearB = min(M2, key= lambda x: x[-1])
-
-
 
 			if farA[-1] <= nearB[-1]:
 				temp_Rn += addRelay(farA[:-1], nearB[:-1], Rc)
@@ -627,15 +449,6 @@ def Put_Relay(S1: Sensor, S2:Sensor):
 				temp_Rn += addRelay(nearB[:-1], S2.v, Rsc)
 		else:
 			temp_Rn += addRelay(S1.v, S2.v, Rsc)
-			print("?")
-			print(S1.v)
-			print(S2.v)
-			print(*S1.Targets)
-			print(*S2.Targets)
-			print(Rs)
-			print(S1.Targets[0].Rsz, S1.Targets[1].Rsz)
-			print(S2.Targets[0].Rsz)
-			exit()
 			# print("?")
 			# print(S1, S2)
 			# print(*S1.Targets)
@@ -648,147 +461,55 @@ def Put_Relay(S1: Sensor, S2:Sensor):
 	return temp_Rn
 
 
-def main():
-	import pickle
-	global n, Rs, Rsc, Rc, Rcl, Qmax, is_plot
-
-	change = "R"
-
-	file = "hanoi"
-
-	is_plot = False
-
-	base = Base([0, 0])
-
-	n = 400
-	Rs = 40
-	Qmax = 5
-	Rcl = 100
-
-	res_node = []
-	res_time = []
-
-	if change == "N":
-		n = 100
-	if change == "R":
-		Rs = 0
-	if change == "Q":
-		Qmax = 0
-
-
-	for _ in range(dataset_num):
-		if change == "N":
-			n += n_step
-		if change == "R":
-			Rs += Rs_step
-		
-		if change == "Q":
-			Qmax += Qmax_step
-
-
-		totalRn = 0
-		totaltime = 0
-		Rsc = Rs/10
-		Rc = Rs*2
-
-
-		
-		for run in range(data_num):
-			print(f'{change}//{n}_{Rs}_{Qmax}_{run+1}', end = "\r")
-
-			with open(f'{change}//{n}_{Rs}_{Qmax}_{run+1}.pickle', 'rb') as f:
-				T = pickle.load(f)
-
-			starttime = timeit.default_timer()
-
-			C: list[Cluster] = Clustering(T, Rcl)
-
-			Rn = []
-
-			S = []
-			for Ti in T:
-				for Si in Ti.Sensors:
-					if type(Si) == Sensor and Si not in S:
-						S.append(Si)
-
-			for Ci in C:
-				Ci.Put_relay(S, Rn)
-
-			E = Construct_E(C, base)
-
-			if is_plot:
-				Plotdata(H, T, Rs)
-
-			for Ei in E:
-				# q = max(len(Ei.V1.V.Center.Sensors), len(Ei.V2.V.Center.Sensors))
-				res = Put_relay_E(Ei.V1.V.Center, Ei.V2.V.Center)
-				# for __ in range(q):x
-				Rn.extend(res)
-
-			endtime = timeit.default_timer()
-
-			totalRn += len(Rn)
-			totaltime += endtime - starttime
-		
-		print()
-
-		totalRn = round(totalRn / data_num)
-		totaltime = round(totaltime / data_num, 5)
-
-		# print(n, Rs, Rc, Rsc, Qmax, f'{Rs} - {Rs+Rs}', end = "\t")
-		res_node.append(totalRn)
-		res_time.append(totaltime)
-
-	print(*res_node, sep = "\n")
-	print(*res_time, sep = "\n")
 
 
 def main():
 	import pickle
-	global n, Rs, Rsc, Rc, Qmax, is_plot
+	global n, Rs, Rsc, Rc, Qmax, is_plot, Dim
+
+	Dim = '3D'
+	file = "bacgiang"
 
 	n = 400
 	Rs = 40
-	Rsc = 4
-	Rc = 80
+	Rsc = Rs/10
+	Rc = Rs*2
 	Qmax = 5
 	is_plot = False
 	Rcl = 100
 	
-	base = Base([0, 0, 0])
+	if Dim == "3D":
+		base = Base([0, 0, 0])
+		with open(f"3D//{file}.pickle", "rb") as f:
+			T: list[Target] = pickle.load(f)
 
-	file = "sonla"
-	with open(f"3D//{file}.pickle", "rb") as f:
-		T: list[Target] = pickle.load(f)
+		starttime = timeit.default_timer()
 
-	starttime = timeit.default_timer()
+		Rn = []
 
-	Rn = []
+		S = []
 
-	S = []
+		C: list[Cluster] = Clustering(T, Rcl)
+		for Ti in T:
+			for Si in Ti.Sensors:
+				if type(Si) == Sensor and Si not in S:
+					S.append(Si)
 
-	C: list[Cluster] = Clustering(T, Rcl)
-	for Ti in T:
-		for Si in Ti.Sensors:
-			if type(Si) == Sensor and Si not in S:
-				S.append(Si)
+		for Ci in C:
+			Ci.Put_relay(S, Rn)
 
-	for Ci in C:
-		Ci.Put_relay(S, Rn)
+		E = Construct_E(C, base)
 
-	E = Construct_E(C, base)
+		if is_plot:
+			Plotdata(H, T, Rs)
 
-	if is_plot:
-		Plotdata(H, T, Rs)
+		for Ei in E:
+			q = max(len(Ei.V1.V.Center.Sensors), len(Ei.V2.V.Center.Sensors))
+			res = Put_relay_E(Ei.V1.V.Center, Ei.V2.V.Center)
+			for __ in range(q):
+				Rn.extend(res)
 
-	for Ei in E:
-		q = max(len(Ei.V1.V.Center.Sensors), len(Ei.V2.V.Center.Sensors))
-		res = Put_relay_E(Ei.V1.V.Center, Ei.V2.V.Center)
-		for __ in range(q):
-			Rn.extend(res)
-
-
-	endtime = timeit.default_timer()
+		endtime = timeit.default_timer()
 
 	print(len(Rn))
 	print(endtime-starttime)

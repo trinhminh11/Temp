@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from math import dist
 from munkres import Munkres
 import numpy as np
-from copy import deepcopy
+from copy import deepcopy, copy
+from tqdm import tqdm
 
 
 
@@ -70,7 +71,7 @@ def addRelay(A, B, r):
 
 		for k in range(len(A)):
 			sensor.append(A[k] + (j+1)*(B[k]-A[k])/(add+1) + np.random.choice([1e-10, 1e-9, 1e-8, -1e-10, -1e-9, -1e-8, 2e-10, 2e-9, 2e-8, -2e-10, -2e-9, -2e-8]))
-
+		sensor.append(r)
 		res.append(sensor)
 	
 	return res
@@ -258,16 +259,26 @@ def Hungarian(G1: Group, G2: Group):
 	# if len_new != sum([len(Put_Relay(S1[row], S2[col])) for row, col in ans.items()]):
 	# 	print("wtf")
 
-	if len_old > len_new:
+	if len_new < len_old:
 		G2.T.Sensors = [temp_S2[i] for i in range(q)]
 
 	for i in range(q):
 		if G2.T.Sensors[i] == 0:
 			G2.T.Sensors[i] = deepcopy(G1.T.Sensors[i])
+			if len_new < len_old:
+				if new[i] != []:
+					print("WTF3")
+					breakpoint()
+			else:
+				if old[i] != []:
+					print("WTF4")
+					breakpoint()
+			
+			
 	
 	# return new
 
-	return old if len_old < len_new else new
+	return new if len_new < len_old else old
 	
 # kruskal algorithm
 def Kruskal(Gvs: list[Group], key = lambda x: x):
@@ -332,6 +343,7 @@ def calc_lock(Ts: list[Target]):
 	
 
 	locked = []
+
 	for i in range(1, len(Ts)):
 		j = 0
 		is_swap = []
@@ -367,7 +379,8 @@ def GHS(base, Ts: list[Target]):
 		for i in range(len(T.Sensors)):
 			if type(T.Sensors[i]) != int:
 				if T.Sensors[i].locked:
-					T.Sensors[i] = deepcopy(T.Sensors[i])
+					T.Sensors[i] = copy(T.Sensors[i])
+	
 	
 
 	GVs = [Group(Ts[i],  i+1) for i in range(len(Ts))]
@@ -461,13 +474,12 @@ def Plotdata(H, T, Rs):
 
 def main():
 	import pickle
-	from collections import Counter
 	global n, Rs, Rsc, Rc, Qmax, is_plot, Dim
 
-	Dim = "3D"
-	file = "hanoi"
+	Dim = "2D"
+	file = "N"
 
-	n = 400
+	n = 600
 	Rs = 40
 	Rc = Rs*2
 	Rsc = Rs//10
@@ -480,32 +492,26 @@ def main():
 		with open(f"3D//{file}.pickle", "rb") as f:
 			T: list[Target] = pickle.load(f)
 		
+		tmp = 0
+		for T_ in T:
+			tmp += T_.q
+
+		print(tmp)
+		
 		starttime = timeit.default_timer()
 		GVs, Rn = GHS(base, T)
 		endtime = timeit.default_timer()
 
 		with open(f'3D//{file}GHS.pickle', 'wb') as f:
 			pickle.dump(GVs, f)
-
 		
-		# Check for duplicates in Rn and print all duplicates with their counts
-		# relay_counter = Counter(tuple(relay) for relay in Rn)
-		# duplicates = {relay: count for relay, count in relay_counter.items() if count > 1}
-
-		# if duplicates:
-		# 	print("Duplicates found in Rn:")
-		# 	for duplicate, count in sorted(duplicates.items()):
-		# 		print(f"{list(duplicate)} appears {count} times")
-		# else:
-		# 	print("No duplicates in Rn")
-
 		total = len(Rn)
 
 	elif Dim == "2D":
 		base = Base([0, 0])
 		total = 0
 		print(n, Rs, Rc, Rsc, Qmax)
-		for i in range(1, 21):
+		for i in tqdm(range(1, 21)):
 			with open(f'{file}//{n}_{Rs}_{Qmax}_{i}.pickle', 'rb') as f:
 				T: list[Target] = pickle.load(f)
 			
