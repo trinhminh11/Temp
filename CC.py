@@ -1,0 +1,148 @@
+import numpy as np
+
+from CONSTANT import *
+from Q_Coverage import Q_Coverage
+from ImportData import *
+import random
+from math import dist
+import matplotlib.pyplot as plt
+import sys
+sys.setrecursionlimit(10000)
+
+
+random.seed(random_seed)
+base = [0, 0, 0]
+
+class Vertex(object):
+	def __init__(self, T, index):
+		self.T = T
+		self.v = T.v
+		self.neigh = []
+		self.q = T.q
+		self.index = index
+		self.p = None
+
+def find_set(v, parent):
+	if v == parent[v]: 
+		return v
+	p = find_set(parent[v], parent)
+	parent[v] = p
+	return p
+
+def union_sets(a, b, parent):
+	a = find_set(a, parent)
+	b = find_set(b, parent)
+	if (a != b):
+		parent[b] = a
+
+
+def Cluster(T, Rs):
+	C = []
+
+	n = len(T)
+	parent = [i for i in range(n)]
+
+
+	V = [Vertex(T[i], i) for i in range(n)]
+	E = []
+	for i in range(n-1):
+		for j in range(i+1, n):
+			if dist(V[i].v, V[j].v) <= 2*Rs:
+				if find_set(i, parent) == find_set(j, parent):
+					continue
+				union_sets(i, j, parent)
+
+	for i in range(n):
+		V[i].p = find_set(i, parent)
+
+	V.sort(key = lambda x: x.p)
+	minp = V[0].p
+	maxp = V[-1].p
+	Vindex = 0
+	for p in range(minp, maxp+1):
+		C.append([])
+
+		while Vindex < n and V[Vindex].p == p:
+			C[p-minp].append(V[Vindex].T)
+			Vindex += 1
+
+	temp = C.count([])
+	for i in range(temp):
+		C.remove([])
+
+	return C
+
+
+def SPARTA_CC(T, Rs):
+	C = Cluster(T, Rs)
+	S = []
+	Tc = []
+	for ii in range(len(C)):
+		Tc.append([])
+		for jj in range(len(C[ii])):
+			Tc[ii].append(C[ii][jj])
+
+	for ii in range(len(C)):
+		Sq, _ = Q_Coverage(Tc[ii], Rs)
+		S += Sq
+
+	return S
+
+def Plotdata(W, H, T, S, Rs):
+	plt.xlabel('width')
+	plt.ylabel("height")
+	plt.xlim(0, W+Rs)
+	plt.ylim(0, H+Rs)
+	# fig, ax = plt.subplots()
+
+	theta = np.linspace(0 , 2 * np.pi , 150 ) 
+	radius = Rs
+
+	for i in range(len(T)):
+		a = T[i].v[0] + radius * np.cos( theta )
+		b = T[i].v[1] + radius * np.sin( theta )
+
+		plt.annotate(T[i].q, (T[i].v[0], T[i].v[1]))
+		plt.plot(a, b)
+
+	for i in range(len(S)):
+		plt.scatter(S[i].v[0], S[i].v[1], s = 50)
+
+	plt.show()
+
+
+def main():
+	import pickle
+	global n, Rs, Rsc, Rc, Qmax, is_plot
+
+
+	base = Base([0, 0])
+
+	Rs = 40
+
+	Dataset, Targets, Qs, file, change = Import_data()
+	print(file)
+
+	n = len(Targets[0])
+
+	Rsc = Rs/10
+	Rc = Rs*2
+
+	T = []
+	Rsz = [random.random()*50+50 for i in range(n)]
+
+
+	T = [Target(Targets[0][i], Qs[0][i], Rsz[i], []) for i in range(n)]
+
+
+
+	S: list[Sensor] = SPARTA_CC(T, Rs)
+
+	print(len(S))
+
+			
+
+if __name__ == "__main__":
+	main()
+
+	
