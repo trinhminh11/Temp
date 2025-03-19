@@ -51,6 +51,7 @@ class Group:
 		self.childs: list[Group] = []
 		self.index: int = index
 		self.T = T
+		self.next_connection: list[list] = None
 		self.depth = 0
 
 		if type(T) == Target:
@@ -71,6 +72,9 @@ class Group:
 
 		if type(T) == Base:
 			self.mid = T.v
+	
+	def init_connection(self):
+		self.next_connection = [[None for _ in range(len(self.childs))] for _ in range(len(self.T.Sensors))] # [i][j] with i is i-th sensor and j is j-th child
 
 	def find_child(self, path, GVs):
 		for i in range(len(path)):

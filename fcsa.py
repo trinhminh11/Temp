@@ -7,7 +7,22 @@ import numpy as np
 from copy import deepcopy
 
 
-data_transmit_receive = []
+data_transmit_receive_R = []
+
+data_outage = []
+
+def outage_probability(
+        K: int,
+        alpha = 1,
+        P = 1,
+        Rth = .2,
+        sigma = 1e-32
+    ):
+    x = np.log(2) * Rth * (K+1)
+    numerator = sigma*sigma*(K+1)*(1-np.exp(x))
+    denominator = alpha * P
+
+    return 1 - np.exp(numerator/denominator)
 
 def energy(no_transmit, no_receive, R):
     E_elec = 50*1e-9
@@ -17,13 +32,13 @@ def energy(no_transmit, no_receive, R):
     return result
 
 
-def calc_energy(data, R):
+def calc_energy(data):
     total_E = 0
     max_E = float('-inf')
     min_E = float('inf')
 
 
-    for no_transmit, no_receive in data:
+    for no_transmit, no_receive, R in data:
         energy_consumption = energy(no_transmit, no_receive, R)
 
         total_E += energy_consumption
@@ -99,7 +114,7 @@ def addRelay(A, B, r):
 
         for k in range(len(A)):
             sensor.append(A[k] + (j+1)*(B[k]-A[k])/(add+1))
-
+        sensor.append(r)
         res.append(sensor)
     
     return res
@@ -258,10 +273,13 @@ def FCSA(base, Ts: list[Target]):
 
     for s in S:
         current_Rn = Put_Relay(s, base)
-        data_transmit_receive.append((len(s.Targets), 0))
-        for i in range(len(current_Rn)):
-            data_transmit_receive.append((len(s.Targets), len(s.Targets)))
-        data_transmit_receive.append((0, len(s.Targets)))
+        data_transmit_receive_R.append((len(s.Targets), 0, Rsc))
+        for R in current_Rn:
+            data_transmit_receive_R.append((len(s.Targets), len(s.Targets), R[-1]))
+
+        data_transmit_receive_R.append((0, len(s.Targets), Rsc))
+
+        data_outage.append(len(current_Rn)+1)
 
         Rn += current_Rn
 
@@ -379,10 +397,10 @@ def main():
 
 def main():
     import pickle
-    global n, Rs, Rsc, Rc, Qmax, is_plot
+    global n, Rs, Rsc, Rc, Qmax, is_plot, data_outage
 
 
-    file = "thaibinh"
+    file = "bacgiang"
 
     n = 400
     Rs = 40
@@ -405,8 +423,20 @@ def main():
     print(len(Rn))
     print(endtime-starttime)
 
-    total_E, mean_E, delta_E = calc_energy(data_transmit_receive, Rs)
+    print(np.mean(data_outage), np.max(data_outage), np.min(data_outage))
+    
+    outages = [outage_probability(
+        K,
+        alpha=1,
+        P=1,
+        Rth=.2,
+        sigma=1e-32
+        ) for K in data_outage
+    ]
+
+    total_E, mean_E, delta_E = calc_energy(data_transmit_receive_R)
     print(f'{total_E:.5f}, {mean_E:.5f}, {delta_E:.5f}')
+    print(f'{np.mean(outages):.5f}')
 
 
 if __name__ == "__main__":

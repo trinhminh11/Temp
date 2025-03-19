@@ -6,6 +6,7 @@ import timeit
 import random
 
 
+
 def Plotdata(H, T, S, Rs):
 	plt.xlabel('width')
 	plt.ylabel("height")

@@ -15,6 +15,7 @@ class Group:
 		self.childs: list[Group] = []
 		self.index: int = index
 		self.T = T
+		self.next_connection: list[list] = None
 		self.depth = 0
 
 		if type(T) == Target:
@@ -35,6 +36,9 @@ class Group:
 
 		if type(T) == Base:
 			self.mid = T.v
+	
+	def init_connection(self):
+		self.next_connection = [[None for _ in range(len(self.childs))] for _ in range(len(self.T.Sensors))] # [i][j] with i is i-th sensor and j is j-th child
 
 	def find_child(self, path, GVs):
 		for i in range(len(path)):
@@ -70,7 +74,7 @@ def addRelay(A, B, r):
 		sensor = []
 
 		for k in range(len(A)):
-			sensor.append(A[k] + (j+1)*(B[k]-A[k])/(add+1) + np.random.choice([1e-10, 1e-9, 1e-8, -1e-10, -1e-9, -1e-8, 2e-10, 2e-9, 2e-8, -2e-10, -2e-9, -2e-8]))
+			sensor.append(A[k] + (j+1)*(B[k]-A[k])/(add+1))
 		sensor.append(r)
 		res.append(sensor)
 	
@@ -264,7 +268,7 @@ def Hungarian(G1: Group, G2: Group):
 
 	for i in range(q):
 		if G2.T.Sensors[i] == 0:
-			G2.T.Sensors[i] = deepcopy(G1.T.Sensors[i])
+			G2.T.Sensors[i] = G1.T.Sensors[i]
 			if len_new < len_old:
 				if new[i] != []:
 					print("WTF3")
@@ -396,29 +400,19 @@ def GHS(base, Ts: list[Target]):
 
 	GVs.sort(key= lambda x: x.depth)
 
-	# for G in GVs:
-	# 	G.draw_path()
 
 	
 	Rn = []
-
 	for G in GVs:
-		for i in range(len(G.T.Sensors)):
-			G.T.Sensors[i].next_connection = [None for _ in range(len(G.childs))] if len(G.childs) != 0 else None
-
-		# if G_idx == 44:
-		# 	for i in range(len(GVs[44].T.Sensors)):
-		# 		print(GVs[44].T.Sensors[i].next_connection)
-		
+		G.init_connection()
 		for child_idx in range(len(G.childs)):
 			Rns = Hungarian(G, G.childs[child_idx])
 
 			for i in range(len(G.T.Sensors)):
-				G.T.Sensors[i].next_connection[child_idx] = Rns[i]
+				G.next_connection[i][child_idx] = Rns[i]
 				Rn += Rns[i]
 
 		
-
 			# Rn += Hungarian(G, child)
 	if is_plot:
 		for G in GVs:
@@ -476,14 +470,15 @@ def main():
 	import pickle
 	global n, Rs, Rsc, Rc, Qmax, is_plot, Dim
 
-	Dim = "2D"
-	file = "N"
+	Dim = "3D"
+	file = "bacgiang"
 
-	n = 600
+	n = 400
 	Rs = 40
 	Rc = Rs*2
 	Rsc = Rs//10
 	Qmax = 5
+	Qsz = 80
 	is_plot = False
 	
 	
@@ -512,7 +507,12 @@ def main():
 		total = 0
 		print(n, Rs, Rc, Rsc, Qmax)
 		for i in tqdm(range(1, 21)):
-			with open(f'{file}//{n}_{Rs}_{Qmax}_{i}.pickle', 'rb') as f:
+			if file == "T":
+				filename = f'{file}//{n}_{Rs}_{Qmax}_{Qsz}_{i}.pickle'
+			else:
+				filename = f'{file}//{n}_{Rs}_{Qmax}_{i}.pickle'
+
+			with open(filename, 'rb') as f:
 				T: list[Target] = pickle.load(f)
 			
 			starttime = timeit.default_timer()
@@ -521,7 +521,7 @@ def main():
 
 			total += len(Rn)
 
-			with open(f'GHS//{file}//{n}_{Rs}_{Qmax}_{i}.pickle', 'wb') as f:
+			with open(f'GHS//{filename}', 'wb') as f:
 				pickle.dump(GVs, f)
 		
 		total/=20

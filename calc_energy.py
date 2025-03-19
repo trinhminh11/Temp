@@ -75,9 +75,9 @@ class Node:
 
         for child_idx, child in enumerate(group.childs):
 
-            self.n_relays.append(len(group.T.Sensors[i].next_connection[child_idx]))
+            self.n_relays.append(len(group.next_connection[i][child_idx]))
 
-            self.relays.append(group.T.Sensors[i].next_connection[child_idx])
+            self.relays.append(group.next_connection[i][child_idx])
 
             self.children.append(Node(child.T.Sensors[i]))
             
@@ -118,11 +118,12 @@ class Node:
         
         for idx in range(len(self.children)):
             if self.n_relays[idx] == 0:
-                print(self.n_relays)
-                print(self.v)
-                print("=====")
-                print(self.children)
-        
+                # print(self.n_relays)
+                # print(self.v)
+                # print("=====")
+                # print(self.children)
+
+                pass 
     
     def calc_data_transmit_receive(self, is_base = False):
         if len(self.children) == 0:
@@ -152,7 +153,7 @@ class Node:
 
         for idx in range(len(self.children)):
             for relay in self.relays[idx]:
-                data_transmit_receive_R.append((self.children[idx].n_transmit, self.children[idx].n_transmit, relay[3]))
+                data_transmit_receive_R.append((self.children[idx].n_transmit, self.children[idx].n_transmit, relay[2]))
 
 
     def plot_tree(self, current_depth = 0, max_depth = float('inf')):
@@ -222,7 +223,7 @@ def get_tree(GVs):
 
 
 def main():
-    global n, Rs, Rsc, Rc, Qmax, is_plot, Dim, data_outage
+    global n, Rs, Rsc, Rc, Qmax, is_plot, Dim, data_outage, data_transmit_receive_R, total_Relay
     is_plot = False
 
     Dim = "3D"
@@ -235,37 +236,77 @@ def main():
     Rc = Rs*2
     Rsc = Rs//10
     Qmax = 5
+    Qsz = 80
+
 
     if Dim == "3D":
         with open(f"3D/{file}{algo}.pickle", "rb") as f:
             GVs: list[Group] = pickle.load(f)
 
-        trees = get_tree(GVs)     
+        get_tree(GVs)  
+
+        print(np.mean(data_outage), np.max(data_outage), np.min(data_outage))
+
+        outages = [outage_probability(
+            K,
+            alpha=1,
+            P=1,
+            Rth=.2,
+            sigma=1e-32
+            ) for K in data_outage
+        ]
+        
+        list_E, mean_E, delta_E = calc_energy(data_transmit_receive_R)
+        list_E.sort()
+        total_E = sum(list_E)
+
+        print(f'{total_E:.5f}, {mean_E:.5f}, {delta_E:.5f}')
+
+        print(f'{np.mean(outages):.5f}')  
 
     elif Dim == "2D":
         mean_total_outage = 0
+        mean_total_E = 0
+        mean_mean_E = 0
+        mean_delta_E = 0
         for run in range(1, 21):
-            with open(f'{algo}/{file}/{n}_{Rs}_{Qmax}_{run}', 'rb') as f:
+            if file == "T":
+                filename = f'{file}//{n}_{Rs}_{Qmax}_{Qsz}_{run}.pickle'
+            else:
+                filename = f'{file}//{n}_{Rs}_{Qmax}_{run}.pickle'
+                    
+            with open(f'{algo}/{filename}', 'rb') as f:
                 GVs: list[Group] = pickle.load(f)
             
             get_tree(GVs)
 
-            print(np.mean(data_outage), np.max(data_outage), np.min(data_outage))
+            # print(np.mean(data_outage), np.max(data_outage), np.min(data_outage))
 
             outages = [outage_probability(
                 K,
                 alpha=1,
                 P=1,
                 Rth=.2,
-                sigma=1e-20
+                sigma=1e-32
                 ) for K in data_outage]
 
             mean_total_outage += np.mean(outages)
 
+            list_E, mean_E, delta_E = calc_energy(data_transmit_receive_R)
+            list_E.sort()
+            total_E = sum(list_E)
+
+            mean_total_E += total_E
+            mean_mean_E += mean_E
+            mean_delta_E += delta_E
+
+
             data_outage = []
             data_transmit_receive_R = []
+            total_Relay = 0
         
-        print(mean_total_outage/20)
+        print(f'{mean_total_E/20:.5f}, {mean_mean_E/20:.5f}, {mean_delta_E/20:.5f}')
+        print(f'{mean_total_outage/20:.5f}')
 
 if __name__ == "__main__":
     main()
